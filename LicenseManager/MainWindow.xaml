@@ -1,0 +1,171 @@
+﻿<Window x:Class="LicenseManager.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
+        xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+        xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"
+        Title="License Manager"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="CanMinimize"
+        dx:ThemeManager.ThemeName="Win11Light"
+        MinWidth="900"
+        MaxWidth="1000"
+        Width="950"
+        Height="650">
+    <Grid Margin="10" Background="LightGray">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <!-- HEADER: 3 cột, avatar | nút | avatar admin -->
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <!-- Avatar/logo bên trái -->
+            <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                <Image Source="Images/Monitor Image.png" Width="50" Height="50" Margin="10,0,0,0"/>
+            </StackPanel>
+            <!-- Border chứa nút ở giữa -->
+            <Border 
+                Grid.Column="1"
+                BorderThickness="1"
+                CornerRadius="5"
+                HorizontalAlignment="Center"
+                Margin="0,0,0,8"
+                Padding="8"
+                Width="580">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                    <dx:SimpleButton x:Name="btnBlock" Content="Block" Width="100" Height="30" Margin="10,0" Click="btnBlock_Click"
+                                     Glyph="{dx:DXImage 'SvgImages/Icon Builder/Security_Lock.svg'}" GlyphHeight="20"/>
+                    <dx:SimpleButton x:Name="btnUnblock" Content="Unblock" Width="100" Height="30" Margin="10,0" Click="btnUnblock_Click"
+                                     Glyph="{dx:DXImage 'SvgImages/Icon Builder/Security_Unlock.svg'}" GlyphHeight="20"/>
+                    <dx:SimpleButton x:Name="btnShowBlockList" Content="Show Block List" Width="Auto" Height="30" Margin="10,0" Click="btnShowBlockList_Click"
+                                     Glyph="{dx:DXImage 'SvgImages/XAF/State_ItemVisibility_Show.svg'}" GlyphHeight="20"/>
+                    <dx:SimpleButton x:Name="btnUnblockAll" Content="Unblock All" Width="120" Height="30" Margin="10,0" Click="btnUnblockAll_Click"
+                                     Glyph="{dx:DXImage 'SvgImages/RichEdit/TrackingChanges_LockTracking.svg'}" GlyphHeight="20"/>
+                </StackPanel>
+            </Border>
+            <!-- Avatar admin bên phải -->
+            <StackPanel Grid.Column="2" Orientation="Vertical" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,10,0">
+                <Ellipse Height="45" Width="45" StrokeThickness="2" Margin="0,8,0,0"
+                         SnapsToDevicePixels="True" RenderOptions.BitmapScalingMode="HighQuality">
+                    <Ellipse.Stroke>
+                        <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                            <GradientStop Color="#00A9FF"/>
+                            <GradientStop Color="#FB539B" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Ellipse.Stroke>
+                    <Ellipse.Fill>
+                        <ImageBrush ImageSource="/Images/Admin Image.png"/>
+                    </Ellipse.Fill>
+                </Ellipse>
+                <TextBlock Text="Administrator"
+                   FontSize="12" FontWeight="SemiBold"
+                   VerticalAlignment="Center" Margin="0,8,0,8"/>
+            </StackPanel>
+        </Grid>
+        <!-- GRID DỮ LIỆU -->
+        <dxg:GridControl x:Name="gcLicenses" Grid.Row="1" Margin="0,10,0,0"
+                         SelectionMode="Row" AutoGenerateColumns="None"
+                         MinWidth="900" MaxWidth="1000">
+            <dxg:GridControl.View>
+                <dxg:TableView 
+                    Name="tableView"
+                    ShowSearchPanelMode="Always"
+                    RowMinHeight="30"
+                    HeaderPanelMinHeight="35"
+                    NavigationStyle="Row">
+                    <dxg:TableView.RowStyle>
+                        <Style TargetType="dxg:RowControl">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Row.IsBlocked}" Value="True">
+                                    <Setter Property="Background" Value="#FFD32F2F"/>
+                                    <Setter Property="Foreground" Value="White"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </dxg:TableView.RowStyle>
+                </dxg:TableView>
+            </dxg:GridControl.View>
+            <dxg:GridControl.Columns>
+                <dxg:GridColumn Header="STT" FieldName="STT" Width="50" ReadOnly="True" HorizontalHeaderContentAlignment="Center"/>
+                <dxg:GridColumn Header="NAS Account" FieldName="ActiveUser" Width="180" ReadOnly="True" HorizontalHeaderContentAlignment="Center"/>
+                <dxg:GridColumn Header="MAC Address" FieldName="MacAddress" Width="140" ReadOnly="True" HorizontalHeaderContentAlignment="Center"/>
+                <dxg:GridColumn Header="PC Name" FieldName="MachineName" Width="120" ReadOnly="True" HorizontalHeaderContentAlignment="Center"/>
+                <dxg:GridColumn Header="Last ping" FieldName="OpenTimeString" Width="160" ReadOnly="True" HorizontalHeaderContentAlignment="Center"/>
+                <dxg:GridColumn Header="Status" FieldName="Status" Width="100" ReadOnly="True" HorizontalHeaderContentAlignment="Center">
+                    <dxg:GridColumn.CellTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <Ellipse Width="10" Height="10" Margin="0,0,5,0">
+                                    <Ellipse.Style>
+                                        <Style TargetType="Ellipse">
+                                            <Setter Property="Fill" Value="#BDBDBD"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding Row.Status}" Value="Online">
+                                                    <Setter Property="Fill" Value="#43A047"/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding Row.Status}" Value="Offline">
+                                                    <Setter Property="Fill" Value="#E53935"/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding Row.IsBlocked}" Value="True">
+                                                    <Setter Property="Fill" Value="White"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Ellipse.Style>
+                                </Ellipse>
+                                <TextBlock Text="{Binding Row.Status}" FontWeight="Bold" VerticalAlignment="Center">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Foreground" Value="#43A047"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding Row.Status}" Value="Offline">
+                                                    <Setter Property="Foreground" Value="#E53935"/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding Row.IsBlocked}" Value="True">
+                                                    <Setter Property="Foreground" Value="White"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </StackPanel>
+                        </DataTemplate>
+                    </dxg:GridColumn.CellTemplate>
+                </dxg:GridColumn>
+                <dxg:GridColumn Header="Is Blocked?" FieldName="BlockedString" Width="*" ReadOnly="True" HorizontalHeaderContentAlignment="Center">
+                    <dxg:GridColumn.CellTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center" >
+                                <!-- Icon khoá: chỉ hiện khi IsBlocked -->
+                                <Image Width="18" Height="18"
+                       Margin="0,0,5,0"
+                       Visibility="{Binding Row.IsBlocked, Converter={StaticResource BlockedToVisibilityConverter}}"
+                       Source="{dx:DXImage 'SvgImages/Icon Builder/Security_Lock.svg'}"/>
+                                <TextBlock Text="{Binding Row.BlockedString}" 
+                           FontWeight="Bold"
+                           VerticalAlignment="Center"
+                           HorizontalAlignment="Center">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Foreground" Value="#E53935"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding Row.IsBlocked}" Value="True">
+                                                    <Setter Property="Foreground" Value="White"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </StackPanel>
+                        </DataTemplate>
+                    </dxg:GridColumn.CellTemplate>
+                </dxg:GridColumn>
+            </dxg:GridControl.Columns>
+        </dxg:GridControl>
+    </Grid>
+</Window>
