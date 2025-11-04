@@ -12,6 +12,7 @@ namespace LicenseManager.Models
         private bool _isOnline;
         private string _macAddress;
         private string _machineName;
+        private string _fullName; // Thêm thuộc tính FullName
 
         public int STT
         {
@@ -73,6 +74,20 @@ namespace LicenseManager.Models
         {
             get => _machineName;
             set { if (_machineName != value) { _machineName = value; OnPropertyChanged(nameof(MachineName)); } }
+        }
+
+        // Thêm property FullName để nhập tên đầy đủ của user
+        public string FullName
+        {
+            get => _fullName;
+            set
+            {
+                if (_fullName != value)
+                {
+                    _fullName = value;
+                    OnPropertyChanged(nameof(FullName));
+                }
+            }
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

@@ -8,10 +8,8 @@
         WindowStartupLocation="CenterScreen"
         ResizeMode="CanMinimize"
         dx:ThemeManager.ThemeName="Win11Light"
-        MinWidth="900"
-        MaxWidth="1000"
-        Width="950"
-        Height="650">
+        MinWidth="900" SizeToContent="Width"
+        Height="750">
     <Grid Margin="10" Background="LightGray">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -70,14 +68,18 @@
         <!-- GRID DỮ LIỆU -->
         <dxg:GridControl x:Name="gcLicenses" Grid.Row="1" Margin="0,10,0,0"
                          SelectionMode="Row" AutoGenerateColumns="None"
-                         MinWidth="900" MaxWidth="1000">
+                         MinWidth="900">
             <dxg:GridControl.View>
                 <dxg:TableView 
                     Name="tableView"
                     ShowSearchPanelMode="Always"
                     RowMinHeight="30"
                     HeaderPanelMinHeight="35"
-                    NavigationStyle="Row">
+                    AllowEditing="True"
+                    EnableImmediatePosting="True" 
+                    CellValueChanged="gcLicenses_CellValueChanged"
+                    EditorShowMode="MouseDownFocused"
+                    NavigationStyle="Row"> <!--Xoá dòng này nếu muốn chỉnh sửa full name-->
                     <dxg:TableView.RowStyle>
                         <Style TargetType="dxg:RowControl">
                             <Style.Triggers>
@@ -91,12 +93,89 @@
                 </dxg:TableView>
             </dxg:GridControl.View>
             <dxg:GridControl.Columns>
-                <dxg:GridColumn Header="STT" FieldName="STT" Width="50" ReadOnly="True" HorizontalHeaderContentAlignment="Center"/>
-                <dxg:GridColumn Header="NAS Account" FieldName="ActiveUser" Width="180" ReadOnly="True" HorizontalHeaderContentAlignment="Center"/>
-                <dxg:GridColumn Header="MAC Address" FieldName="MacAddress" Width="140" ReadOnly="True" HorizontalHeaderContentAlignment="Center"/>
-                <dxg:GridColumn Header="PC Name" FieldName="MachineName" Width="120" ReadOnly="True" HorizontalHeaderContentAlignment="Center"/>
-                <dxg:GridColumn Header="Last ping" FieldName="OpenTimeString" Width="160" ReadOnly="True" HorizontalHeaderContentAlignment="Center"/>
-                <dxg:GridColumn Header="Status" FieldName="Status" Width="100" ReadOnly="True" HorizontalHeaderContentAlignment="Center">
+                <dxg:GridColumn FieldName="STT" Width="80" ReadOnly="True" HorizontalHeaderContentAlignment="Center">
+                    <dxg:GridColumn.HeaderTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <Image Width="20" Height="20"
+                                   Source="{dx:DXImage 'SvgImages/Outlook Inspired/ListNumbers.svg'}"
+                                   Margin="0,0,10,0"/>
+                                <TextBlock Text="STT" VerticalAlignment="Center" FontWeight="DemiBold"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </dxg:GridColumn.HeaderTemplate>
+                </dxg:GridColumn>
+                <dxg:GridColumn FieldName="FullName" Width="180" HorizontalHeaderContentAlignment="Center">
+                    <dxg:GridColumn.HeaderTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <Image Width="20" Height="20"
+                                   Source="{dx:DXImage 'SvgImages/Business Objects/BO_State.svg'}"
+                                   Margin="0,0,10,0"/>
+                                <TextBlock Text="Full Name" VerticalAlignment="Center" FontWeight="DemiBold"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </dxg:GridColumn.HeaderTemplate>
+                </dxg:GridColumn>
+                <dxg:GridColumn FieldName="ActiveUser" Width="150" ReadOnly="True" HorizontalHeaderContentAlignment="Center">
+                    <dxg:GridColumn.HeaderTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <Image Width="20" Height="20"
+                                   Source="{dx:DXImage 'SvgImages/Business Objects/BO_Customer.svg'}"
+                                   Margin="0,0,10,0"/>
+                                <TextBlock Text="NAS Account" VerticalAlignment="Center" FontWeight="DemiBold"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </dxg:GridColumn.HeaderTemplate>
+                </dxg:GridColumn>
+                <dxg:GridColumn FieldName="MacAddress" Width="150" ReadOnly="True" HorizontalHeaderContentAlignment="Center">
+                    <dxg:GridColumn.HeaderTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <Image Width="20" Height="20"
+                                   Source="{dx:DXImage 'SvgImages/Icon Builder/Travel_MapPointer.svg'}"
+                                   Margin="0,0,10,0"/>
+                                <TextBlock Text="MAC Address" VerticalAlignment="Center" FontWeight="DemiBold"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </dxg:GridColumn.HeaderTemplate>
+                </dxg:GridColumn>
+                <dxg:GridColumn Header="PC Name" FieldName="MachineName" Width="150" ReadOnly="True" HorizontalHeaderContentAlignment="Center">
+                    <dxg:GridColumn.HeaderTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <Image Width="20" Height="20"
+                                   Source="{dx:DXImage 'SvgImages/Icon Builder/Electronics_DesktopWindows.svg'}"
+                                   Margin="0,0,10,0"/>
+                                <TextBlock Text="PC Name" VerticalAlignment="Center" FontWeight="DemiBold"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </dxg:GridColumn.HeaderTemplate>
+                </dxg:GridColumn>
+                <dxg:GridColumn FieldName="OpenTimeString" Width="180" ReadOnly="True" HorizontalHeaderContentAlignment="Center">
+                    <dxg:GridColumn.HeaderTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <Image Width="20" Height="20"
+                                   Source="{dx:DXImage 'SvgImages/Business Objects/BO_Audit_ChangeHistory.svg'}"
+                                   Margin="0,0,10,0"/>
+                                <TextBlock Text="Last ping" VerticalAlignment="Center" FontWeight="DemiBold"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </dxg:GridColumn.HeaderTemplate>
+                </dxg:GridColumn>
+                <dxg:GridColumn FieldName="Status" Width="120" ReadOnly="True" HorizontalHeaderContentAlignment="Center">
+                    <dxg:GridColumn.HeaderTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <Image Width="20" Height="20"
+                                   Source="{dx:DXImage 'SvgImages/Content/CheckBox.svg'}"
+                                   Margin="0,0,10,0"/>
+                                <TextBlock Text="Status" VerticalAlignment="Center" FontWeight="DemiBold"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </dxg:GridColumn.HeaderTemplate>
                     <dxg:GridColumn.CellTemplate>
                         <DataTemplate>
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
@@ -137,19 +216,19 @@
                         </DataTemplate>
                     </dxg:GridColumn.CellTemplate>
                 </dxg:GridColumn>
-                <dxg:GridColumn Header="Is Blocked?" FieldName="BlockedString" Width="*" ReadOnly="True" HorizontalHeaderContentAlignment="Center">
+                <dxg:GridColumn FieldName="BlockedString" Width="120" ReadOnly="True" HorizontalHeaderContentAlignment="Center">
                     <dxg:GridColumn.CellTemplate>
                         <DataTemplate>
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center" >
                                 <!-- Icon khoá: chỉ hiện khi IsBlocked -->
                                 <Image Width="18" Height="18"
-                       Margin="0,0,5,0"
-                       Visibility="{Binding Row.IsBlocked, Converter={StaticResource BlockedToVisibilityConverter}}"
-                       Source="{dx:DXImage 'SvgImages/Icon Builder/Security_Lock.svg'}"/>
+                                   Margin="0,0,5,0"
+                                   Visibility="{Binding Row.IsBlocked, Converter={StaticResource BlockedToVisibilityConverter}}"
+                                   Source="{dx:DXImage 'SvgImages/Icon Builder/Security_Lock.svg'}"/>
                                 <TextBlock Text="{Binding Row.BlockedString}" 
-                           FontWeight="Bold"
-                           VerticalAlignment="Center"
-                           HorizontalAlignment="Center">
+                                   FontWeight="Bold"
+                                   VerticalAlignment="Center"
+                                   HorizontalAlignment="Center">
                                     <TextBlock.Style>
                                         <Style TargetType="TextBlock">
                                             <Setter Property="Foreground" Value="#E53935"/>
@@ -164,6 +243,16 @@
                             </StackPanel>
                         </DataTemplate>
                     </dxg:GridColumn.CellTemplate>
+                    <dxg:GridColumn.HeaderTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <Image Width="20" Height="20"
+                                   Source="{dx:DXImage 'SvgImages/Icon Builder/Security_Lock.svg'}"
+                                   Margin="0,0,10,0"/>
+                                <TextBlock Text="Is Blocked?" VerticalAlignment="Center" FontWeight="DemiBold"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </dxg:GridColumn.HeaderTemplate>
                 </dxg:GridColumn>
             </dxg:GridControl.Columns>
         </dxg:GridControl>

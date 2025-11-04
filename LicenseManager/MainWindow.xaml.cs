@@ -11,7 +11,7 @@ namespace LicenseManager
 {
     public partial class MainWindow : Window
     {
-        private const string DbFile = @"T:\01-Phong-Ban-XN\03-XN TK Ha Tang\05-Tran Van Thoai\15.Project\License App\LicenseData.db";
+        private const string DbFile = @"T:\02-Common Data\06-Du lieu chung\License App\LicenseData.db";
         private static string ConnectionString => $"Data Source={DbFile};Version=3;";
 
         private ObservableCollection<OnlineUserInfo> users = new ObservableCollection<OnlineUserInfo>();
@@ -61,7 +61,8 @@ namespace LicenseManager
                         Id INTEGER PRIMARY KEY AUTOINCREMENT,
                         ActiveUser TEXT,
                         MacAddress TEXT,
-                        MachineName TEXT
+                        MachineName TEXT,
+                        FullName TEXT
                     );
                 ";
                 cmd.ExecuteNonQuery();
@@ -86,27 +87,28 @@ namespace LicenseManager
                 conn.Open();
                 var cmd = conn.CreateCommand();
                 cmd.CommandText = @"
-SELECT
-  mu.ActiveUser,
-  mu.MacAddress,
-  mu.MachineName,
-  uo.OpenTime,
-  CASE
-    WHEN uo.OpenTime IS NOT NULL AND (julianday('now') - julianday(uo.OpenTime)) < (35.0/86400.0) THEN 1
-    ELSE 0
-  END AS IsOnline,
-  CASE
-    WHEN EXISTS (
-      SELECT 1 FROM Blocked b
-      WHERE b.ActiveUser = mu.ActiveUser AND b.MacAddress = mu.MacAddress AND b.MachineName = mu.MachineName
-    ) THEN 1 ELSE 0 END AS IsBlocked
-FROM MasterUser mu
-LEFT JOIN UserOnline uo ON
-  mu.ActiveUser = uo.ActiveUser AND
-  mu.MacAddress = uo.MacAddress AND
-  mu.MachineName = uo.MachineName
-ORDER BY mu.Id
-";
+                    SELECT
+                      mu.ActiveUser,
+                      mu.MacAddress,
+                      mu.MachineName,
+                      mu.FullName,
+                      uo.OpenTime,
+                      CASE
+                        WHEN uo.OpenTime IS NOT NULL AND (julianday('now') - julianday(uo.OpenTime)) < (35.0/86400.0) THEN 1
+                        ELSE 0
+                      END AS IsOnline,
+                      CASE
+                        WHEN EXISTS (
+                          SELECT 1 FROM Blocked b
+                          WHERE b.ActiveUser = mu.ActiveUser AND b.MacAddress = mu.MacAddress AND b.MachineName = mu.MachineName
+                        ) THEN 1 ELSE 0 END AS IsBlocked
+                    FROM MasterUser mu
+                    LEFT JOIN UserOnline uo ON
+                      mu.ActiveUser = uo.ActiveUser AND
+                      mu.MacAddress = uo.MacAddress AND
+                      mu.MachineName = uo.MachineName
+                    ORDER BY mu.Id
+                    ";
                 using (var reader = cmd.ExecuteReader())
                 {
                     int stt = 1;
@@ -118,6 +120,7 @@ ORDER BY mu.Id
                             ActiveUser = reader["ActiveUser"].ToString(),
                             MacAddress = reader["MacAddress"].ToString(),
                             MachineName = reader["MachineName"].ToString(),
+                            FullName = reader["FullName"] != DBNull.Value ? reader["FullName"].ToString() : string.Empty,
                             OpenTime = reader["OpenTime"] != DBNull.Value ? Convert.ToDateTime(reader["OpenTime"]) : DateTime.MinValue,
                             IsOnline = reader["IsOnline"] != DBNull.Value && Convert.ToInt32(reader["IsOnline"]) == 1,
                             IsBlocked = reader["IsBlocked"] != DBNull.Value && Convert.ToInt32(reader["IsBlocked"]) == 1,
@@ -140,6 +143,7 @@ ORDER BY mu.Id
                     exist.OpenTime = u.OpenTime;
                     exist.IsOnline = u.IsOnline;
                     exist.IsBlocked = u.IsBlocked;
+                    exist.FullName = u.FullName; // cập nhật FullName
                     // Nếu có thêm thuộc tính khác hãy cập nhật ở đây
                 }
             }
@@ -277,6 +281,32 @@ ORDER BY mu.Id
                     MessageBox.Show("Không có tài khoản nào để unblock.", "Unblock All");
                 else
                     MessageBox.Show("Đã bỏ block toàn bộ tài khoản.");
+            }
+        }
+
+        // Thêm sự kiện xử lý lưu FullName vào database khi sửa trên grid
+        // Ví dụ: Xử lý CellValueChanged của DevExpress GridControl
+        // (Nếu dùng sự kiện khác, có thể tùy chỉnh lại)
+        private void gcLicenses_CellValueChanged(object sender, DevExpress.Xpf.Grid.CellValueChangedEventArgs e)
+        {
+            if (e.Column.FieldName == "FullName")
+            {
+                var user = e.Row as OnlineUserInfo;
+                if (user != null)
+                {
+                    // Update FullName vào database
+                    using (var conn = new SQLiteConnection(ConnectionString))
+                    {
+                        conn.Open();
+                        var cmd = conn.CreateCommand();
+                        cmd.CommandText = @"UPDATE MasterUser SET FullName=@fullName WHERE ActiveUser=@user AND MacAddress=@mac AND MachineName=@pc";
+                        cmd.Parameters.AddWithValue("@fullName", user.FullName ?? "");
+                        cmd.Parameters.AddWithValue("@user", user.ActiveUser);
+                        cmd.Parameters.AddWithValue("@mac", user.MacAddress);
+                        cmd.Parameters.AddWithValue("@pc", user.MachineName);
+                        cmd.ExecuteNonQuery();
+                    }
+                }
             }
         }
     }
